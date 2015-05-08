@@ -12,36 +12,38 @@ def work(num_req):
 	db = client.test
 	collection = db.playstore_2015_4
 
-	img_folder = '/home/ereli/projects/play-images/'
+	img_folder = '/home/ereli/projects/play-images/new/'
 	batch_size = 0
 #.batch_size(30)
 	for data in collection.find({'top_4_colors' : { '$exists': False}}, no_cursor_timeout=True).limit(num_req):
 		if len(data) != 0:
 			batch_size = 1
-			print data['CoverImgUrl']
+			print "url: "+data['CoverImgUrl']
 			o = urlparse(data['CoverImgUrl'])
-			print(o.path)
+			print("filename: "+o.path)
+			full_path = (img_folder+o.path[1:4]+"/"+o.path).strip()
+			print "full path: "+full_path
+			print os.path.isfile(full_path)
 			try:
 				print("doc id: "+str(data['_id']))
-				print("path "+str(img_folder+o.path))
-				if (os.path.isfile(img_folder+o.path)) is True:
-
-					
+				print("path "+str(full_path))
+				if os.path.isfile(full_path) is True:
 					try:
-						top_4_colors = (ce.main_color(img_folder+o.path))
+						top_4_colors = (ce.main_color(full_path))
 						print top_4_colors
 						collection.update({'_id' :  data['_id']}, {'$set': {'top_4_colors': top_4_colors }})			
 					except Exception, e:
 						raise
 
 				else:
-					try:
-						file_web = cStringIO.StringIO(urllib.urlopen(data['CoverImgUrl']).read())
-						top_4_colors = (ce.main_color(file_web))
-						print top_4_colors
-						collection.update({'_id' :  data['_id']}, {'$set': {'top_4_colors': top_4_colors }})
-					except Exception, e:
-						raise
+					pass
+					#try:
+					#	 file_web = cStringIO.StringIO(urllib.urlopen(data['CoverImgUrl']).read())
+					#	 top_4_colors = (ce.main_color(file_web))
+					#	 print top_4_colors
+					#	 collection.update({'_id' :  data['_id']}, {'$set': {'top_4_colors': top_4_colors }})
+					#except Exception, e:
+					#	raise
 
 
 
